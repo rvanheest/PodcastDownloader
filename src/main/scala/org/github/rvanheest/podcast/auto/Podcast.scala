@@ -51,8 +51,8 @@ case class Podcast(title: String,
     val episodeNumber = (xml \ "episode").headOption map (_.text.trim) withFilter (_.nonEmpty) map (_.toInt)
     val subtitle = (xml \ "subtitle").headOption map (_.text.trim) filter (_.nonEmpty)
 
-    lazy val urlFromEnclosure = xml \ "enclosure" withFilter (_ \@ "type" matches "(audio|video)/(mpeg|mp3|mp4)") map (n => new URL(n \@ "url"))
-    lazy val urlFromContent = xml \ "content" withFilter (_ \@ "medium" == "audio") map (n => new URL(n \@ "url"))
+    lazy val urlFromEnclosure = xml \ "enclosure" withFilter (_ \@ "type" matches "(audio|video)/(mpeg|mp3|mp4)") map (n => URL(n \@ "url"))
+    lazy val urlFromContent = xml \ "content" withFilter (_ \@ "medium" == "audio") map (n => URL(n \@ "url"))
 
     urlFromEnclosure.headOption orElse urlFromContent.headOption map (PodcastEpisode(id, title, pubDate, _, episodeNumber, subtitle))
   }
@@ -78,7 +78,7 @@ object Podcast {
   def read(xml: Node): Podcast = Podcast(
     (xml \ "name").text.trim,
     File((xml \ "saveLocation").text.trim),
-    new URL((xml \ "podcastUrl").text.trim),
+    URL((xml \ "podcastUrl").text.trim),
     Option(xml \@ "disabled") filter (_.nonEmpty) exists (_.trim.toBoolean),
     EpisodeNameTemplate.read((xml \ "episodeNameTemplate").head),
     (xml \ "lastDownloadedEpisode").headOption map LastEpisode.read,

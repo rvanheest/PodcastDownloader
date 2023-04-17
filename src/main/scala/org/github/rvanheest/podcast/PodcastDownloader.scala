@@ -37,8 +37,8 @@ case class Item(title: String, date: String, url: URL, description: String)
 
 def url(): Try[URL] = {
   val urlStr = StdIn.readLine("Podcast URL: ").trim
-  Try { new URL(urlStr) } recoverWith {
-    case _ => Failure(new IllegalArgumentException(s"Podcast URL '$urlStr' is not valid"))
+  Try { URL(urlStr) } recoverWith {
+    case _ => Failure(IllegalArgumentException(s"Podcast URL '$urlStr' is not valid"))
   }
 }
 
@@ -52,10 +52,10 @@ def saveLocation(args: Seq[String]): Try[File] = Try {
   }
 
   if (dest.notExists)
-    throw new IllegalArgumentException(s"download destination '$dest' does not exist")
+    throw IllegalArgumentException(s"download destination '$dest' does not exist")
 
   if (!dest.isDirectory)
-    throw new IllegalArgumentException(s"download destination '$dest' is not a directory")
+    throw IllegalArgumentException(s"download destination '$dest' is not a directory")
 
   dest
 }
@@ -64,7 +64,7 @@ def fetchSkip(): Try[Int] = {
   val countStr = StdIn.readLine("How many entries to skip from the start (0, 1, 2, 3, ...) (default: 0): ").trim.toLowerCase
   countStr match {
     case "" => Success(0)
-    case _ => Try { countStr.toInt } recoverWith { case _ => Failure(new IllegalArgumentException("not a number")) }
+    case _ => Try { countStr.toInt } recoverWith { case _ => Failure(IllegalArgumentException("not a number")) }
   }
 }
 
@@ -72,7 +72,7 @@ def fetchCount(): Try[Int] = {
   val countStr = StdIn.readLine("How many entries to fetch (1, 2, 3, ..., all) (default: all): ").trim.toLowerCase
   countStr match {
     case "" | "all" => Success { Int.MaxValue }
-    case _ => Try { countStr.toInt } recoverWith { case _ => Failure(new IllegalArgumentException("not a number")) }
+    case _ => Try { countStr.toInt } recoverWith { case _ => Failure(IllegalArgumentException("not a number")) }
   }
 }
 
@@ -90,8 +90,8 @@ def parseItem(item: Node): Item = {
   val title = (item \ "title").head.text
   val pubDate = parseDate((item \ "pubDate").text)
 
-  lazy val urlFromEnclosure = (item \ "enclosure").withFilter(_ \@ "type" matches "audio/(mpeg|mp3)").map(n => new URL(n \@ "url")).headOption
-  lazy val urlFromContent = (item \ "content").withFilter(_ \@ "medium" == "audio").map(n => new URL(n \@ "url")).headOption
+  lazy val urlFromEnclosure = (item \ "enclosure").withFilter(_ \@ "type" matches "audio/(mpeg|mp3)").map(n => URL(n \@ "url")).headOption
+  lazy val urlFromContent = (item \ "content").withFilter(_ \@ "medium" == "audio").map(n => URL(n \@ "url")).headOption
 
   val url = (urlFromEnclosure orElse urlFromContent).head
   val description = (item \ "description").text

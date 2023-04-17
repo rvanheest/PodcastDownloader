@@ -57,7 +57,7 @@ case class Podcasts(podcasts: List[Podcast]) {
 }
 
 object Podcasts {
-  private val printer = new PrettyPrinter(160, 4)
+  private val printer = PrettyPrinter(160, 4)
 
   def read(xml: Node): Podcasts = Podcasts((xml \ "podcast" map Podcast.read).toList)
 

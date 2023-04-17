@@ -19,10 +19,10 @@ object FileIO {
 
   private def validateWorkingDirectory(dir: File): Try[File] = Try {
     if (dir.notExists)
-      throw new IllegalArgumentException(s"download destination '$dir' does not exist")
+      throw IllegalArgumentException(s"download destination '$dir' does not exist")
 
     if (!dir.isDirectory)
-      throw new IllegalArgumentException(s"download destination '$dir' is not a directory")
+      throw IllegalArgumentException(s"download destination '$dir' is not a directory")
 
     dir
   }
@@ -31,10 +31,10 @@ object FileIO {
 
   private def validatePodcastsXmlLocation(file: File): Try[File] = Try {
     if (file.notExists)
-      throw new IllegalArgumentException(s"download destination '$file' does not exist")
+      throw IllegalArgumentException(s"download destination '$file' does not exist")
 
     if (!file.isRegularFile)
-      throw new IllegalArgumentException(s"download destination '$file' is not a file")
+      throw IllegalArgumentException(s"download destination '$file' is not a file")
 
     file
   }
