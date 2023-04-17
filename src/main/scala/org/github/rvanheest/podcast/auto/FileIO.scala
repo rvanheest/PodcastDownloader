@@ -8,14 +8,8 @@ import scala.util.Try
 
 object FileIO {
 
-  def workingDirectory(args: Array[String]): Try[File] = {
-    defaultWorkingDirectory(args) getOrElse askWorkingDirectory()
-  }
-
-  private def defaultWorkingDirectory(args: Array[String]): Option[Try[File]] = {
-    val maybeDir = if (args.length > 0) File(args(0)).some
-                   else none
-    maybeDir map validateWorkingDirectory
+  def workingDirectory(workingDir: Option[File]): Try[File] = {
+    workingDir map validateWorkingDirectory getOrElse askWorkingDirectory()
   }
 
   private def askWorkingDirectory(): Try[File] = {
