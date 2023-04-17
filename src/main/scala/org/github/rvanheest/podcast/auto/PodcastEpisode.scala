@@ -40,7 +40,7 @@ case class PodcastEpisode(id: String,
       none
   }
 
-  def episodeName(episodeNameTemplate: EpisodeNameTemplate): String =
+  private def episodeName(episodeNameTemplate: EpisodeNameTemplate): String =
     episodeNameTemplate.titleTemplate
       .fold(episodeNameFromNameTemplate(episodeNameTemplate.nameTemplate)) {
         case (titleMatch, titleTemplate) =>

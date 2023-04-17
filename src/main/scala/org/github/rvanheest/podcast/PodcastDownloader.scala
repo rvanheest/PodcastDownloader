@@ -59,7 +59,7 @@ object PodcastDownloader extends App {
     dest
   }
 
-  def fetchSkip(): Try[Int] = {
+  private def fetchSkip(): Try[Int] = {
     val countStr = StdIn.readLine("How many entries to skip from the start (0, 1, 2, 3, ...) (default: 0): ").trim.toLowerCase
     countStr match {
       case "" => Success(0)
@@ -67,7 +67,7 @@ object PodcastDownloader extends App {
     }
   }
 
-  def fetchCount(): Try[Int] = {
+  private def fetchCount(): Try[Int] = {
     val countStr = StdIn.readLine("How many entries to fetch (1, 2, 3, ..., all) (default: all): ").trim.toLowerCase
     countStr match {
       case "" | "all" => Success { Int.MaxValue }
@@ -75,12 +75,12 @@ object PodcastDownloader extends App {
     }
   }
 
-  def readRss(url: URL): Try[Node] = Try { XML.load(url) }
+  private def readRss(url: URL): Try[Node] = Try { XML.load(url) }
 
   def parseRss(rss: Node, itemCount: Int, skipCount: Int): Try[Podcast] = Try {
     val channel = rss \ "channel"
     val title = (channel \ "title").text
-    val items = (channel \ "item").toStream.map(parseItem).drop(skipCount).take(itemCount).toList
+    val items = (channel \ "item").to(LazyList).map(parseItem).slice(skipCount, skipCount + itemCount).toList
 
     Podcast(title, items)
   }
@@ -104,22 +104,22 @@ object PodcastDownloader extends App {
     ZonedDateTime.parse(dateString, inputFormatter).toLocalDate.format(outputFormatter)
   }
 
-  def csvReport(saveDirectory: File, podcast: Podcast): Try[Unit] = Try {
-    val csvFormat: CSVFormat = CSVFormat.RFC4180
-      .withHeader("title", "date", "url", "description")
-      .withDelimiter(',')
-      .withRecordSeparator('\n')
+  private def csvReport(saveDirectory: File, podcast: Podcast): Try[Unit] = Try {
+    val csvFormat: CSVFormat.Builder = CSVFormat.Builder.create(CSVFormat.RFC4180)
+      .setHeader("title", "date", "url", "description")
+      .setDelimiter(',')
+      .setRecordSeparator('\n')
     val reportFile = saveDirectory / s"${ normalizeFilename(podcast.title) }.csv"
 
     for (fileWriter <- reportFile.fileWriter(append = true);
-         format = if (reportFile.exists) csvFormat.withSkipHeaderRecord() else csvFormat;
+         format = (if (reportFile.exists) csvFormat.setSkipHeaderRecord(true) else csvFormat).build();
          printer <- format.print(fileWriter).autoClosed;
          Item(title, date, url, description) <- podcast.items) {
       printer.printRecord(title, date, url, description)
     }
   }
 
-  def downloadPodcast(saveDirectory: File, podcast: Podcast): Try[Unit] = Try {
+  private def downloadPodcast(saveDirectory: File, podcast: Podcast): Try[Unit] = Try {
     for (Item(title, date, url, _) <- podcast.items) {
       val titleForFilename = normalizeFilename(title)
       val file = saveDirectory / s"$date $titleForFilename.mp3"

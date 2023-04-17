@@ -1,7 +1,6 @@
 package org.github.rvanheest.podcast.auto
 
 import better.files.File
-import cats.instances.stream._
 import cats.instances.try_._
 import cats.syntax.functor._
 import cats.syntax.option._
@@ -52,7 +51,7 @@ case class Podcasts(podcasts: List[Podcast]) {
 
   def toXML: Node = <podcasts>{ podcasts map (_.toXML) }</podcasts>
 
-  def save(file: File): Try[Unit] = Try {
+  private def save(file: File): Try[Unit] = Try {
     XML.save(file.toString(), XML.loadString(printer format toXML), xmlDecl = true)
   }
 }

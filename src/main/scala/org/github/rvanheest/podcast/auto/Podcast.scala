@@ -19,8 +19,8 @@ case class Podcast(title: String,
                    skipEpisodes: Option[List[SkipEpisode]],
                   ) {
 
-  def listEpisodesToDownload(): Try[Stream[PodcastEpisode]] = {
-    if (disabled) Success(Stream.empty)
+  def listEpisodesToDownload(): Try[LazyList[PodcastEpisode]] = {
+    if (disabled) Success(LazyList.empty)
     else readPodcastFeed()
       .map(episodes => (lastEpisode fold episodes) (lastEpisode => episodes takeWhile (lastEpisode.identifier != _.id)))
       .map(episodes => (skipEpisodes fold episodes) (skippers => episodes filterNot (_ matchesAny skippers)))
@@ -31,17 +31,17 @@ case class Podcast(title: String,
     else saveLocation.createDirectory()
   }
 
-  private def readPodcastFeed(): Try[Stream[PodcastEpisode]] = {
+  private def readPodcastFeed(): Try[LazyList[PodcastEpisode]] = {
     Try { XML.load(podcastUrl.toInputStream) } map parseRss recover {
       case e : IOException =>
         System.err.println(s"Fout bij het lezen van RSS feed $podcastUrl: ${ e.getMessage }")
         e.printStackTrace()
-        Stream.empty
+        LazyList.empty
     }
   }
 
-  private def parseRss(rss: Node): Stream[PodcastEpisode] = {
-    (rss \ "channel" \ "item").toStream flatMap parseEpisode
+  private def parseRss(rss: Node): LazyList[PodcastEpisode] = {
+    (rss \ "channel" \ "item").to(LazyList) flatMap parseEpisode
   }
 
   private def parseEpisode(xml: Node): Option[PodcastEpisode] = {
