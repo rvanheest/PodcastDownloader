@@ -14,6 +14,7 @@ case class PodcastEpisode(id: String,
                           title: String,
                           date: String,
                           url: URL,
+                          seasonNumber: Option[Int],
                           episodeNumber: Option[Int],
                           subtitle: Option[String],
                          ) {
@@ -47,6 +48,7 @@ case class PodcastEpisode(id: String,
           episodeNameTemplate.nameTemplate
             .replace("[date]", date)
             .replace("[title]", title.replaceAll(titleMatch, titleTemplate))
+            .replace("[season]", (seasonNumber fold "")(_.toString))
             .replace("[episode]", (episodeNumber fold "")(_.toString))
             .replace("[subtitle]", subtitle getOrElse "")
             .trim
@@ -72,6 +74,7 @@ case class PodcastEpisode(id: String,
     key match {
       case "title" => title.some
       case "date" => date.some
+      case "season" => seasonNumber.map(_.toString)
       case "episode" => episodeNumber.map(_.toString)
       case "subtitle" => subtitle
       case _ => none

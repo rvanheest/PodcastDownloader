@@ -48,13 +48,14 @@ case class Podcast(title: String,
     val id = (xml \ "guid").text.trim
     val title = (xml \ "title").head.text.trim
     val pubDate = parseDate((xml \ "pubDate").text.trim)
+    val seasonNumber = (xml \ "season").headOption map (_.text.trim) withFilter (_.nonEmpty) map (_.toInt)
     val episodeNumber = (xml \ "episode").headOption map (_.text.trim) withFilter (_.nonEmpty) map (_.toInt)
     val subtitle = (xml \ "subtitle").headOption map (_.text.trim) filter (_.nonEmpty)
 
     lazy val urlFromEnclosure = xml \ "enclosure" withFilter (_ \@ "type" matches "(audio|video)/(mpeg|mp3|mp4)") map (n => URL(n \@ "url"))
     lazy val urlFromContent = xml \ "content" withFilter (_ \@ "medium" == "audio") map (n => URL(n \@ "url"))
 
-    urlFromEnclosure.headOption orElse urlFromContent.headOption map (PodcastEpisode(id, title, pubDate, _, episodeNumber, subtitle))
+    urlFromEnclosure.headOption orElse urlFromContent.headOption map (PodcastEpisode(id, title, pubDate, _, seasonNumber, episodeNumber, subtitle))
   }
 
   private def parseDate(dateString: String): String = {
